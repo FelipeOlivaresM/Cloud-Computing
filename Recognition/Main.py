@@ -1,5 +1,4 @@
 # Main.py
-
 import cv2
 import numpy as np
 import os
@@ -7,11 +6,12 @@ import DetectChars
 import DetectPlates
 import PossiblePlate
 import argparse
+import base64
 
-parser = argparse.ArgumentParser(description='Create model.')
+""" parser = argparse.ArgumentParser(description='Create model.')
 parser.add_argument("--image", type=str, help="Complete file name to recognition", required=True)
 args = parser.parse_args()
-
+ """
 
 # module level variables ##########################################################################
 SCALAR_BLACK = (0.0, 0.0, 0.0)
@@ -23,15 +23,23 @@ SCALAR_RED = (0.0, 0.0, 255.0)
 showSteps = False
 
 ###################################################################################################
-def main():
+def main(img):
+    
     blnKNNTrainingSuccessful = DetectChars.loadKNNDataAndTrainKNN()         # attempt KNN training
 
     if blnKNNTrainingSuccessful == False:                               # if KNN training was not successful
         print("\nerror: KNN traning was not successful\n")  # show error message
         return                                                          # and exit program
     # end if
-
-    imgOriginalScene  = cv2.imread(args.image)               # open image
+    """ image = open('./LicPlateImages/2.png', 'rb')
+    image_read = image.read()
+    image_64_encode = base64.encodestring(image_read) """
+    image_64_decode = base64.b64decode(img) 
+    image_result = open('./LicPlateImages/111.png', 'wb') # create a writable image and write the decoding result
+    image_result.write(image_64_decode)
+    
+    #base64.decodestring(img)
+    imgOriginalScene  = cv2.imread("./LicPlateImages/111.png")               # open image
 
     if imgOriginalScene is None:                            # if image was not read successfully
         print("\nerror: image not read from file \n\n")  # print error message to std out
@@ -43,7 +51,7 @@ def main():
 
     listOfPossiblePlates = DetectChars.detectCharsInPlates(listOfPossiblePlates)        # detect chars in plates
 
-    cv2.imshow("imgOriginalScene", imgOriginalScene)            # show scene image
+    #cv2.imshow("imgOriginalScene", imgOriginalScene)            # show scene image
 
     if len(listOfPossiblePlates) == 0:                          # if no plates were found
         print("\nno license plates were detected\n")  # inform user no plates were found
@@ -56,8 +64,8 @@ def main():
                 # suppose the plate with the most recognized chars (the first plate in sorted by string length descending order) is the actual plate
         licPlate = listOfPossiblePlates[0]
 
-        cv2.imshow("imgPlate", licPlate.imgPlate)           # show crop of plate and threshold of plate
-        cv2.imshow("imgThresh", licPlate.imgThresh)
+        #cv2.imshow("imgPlate", licPlate.imgPlate)           # show crop of plate and threshold of plate
+        #cv2.imshow("imgThresh", licPlate.imgThresh)
 
         if len(licPlate.strChars) == 0:                     # if no chars were found in the plate
             print("\nno characters were detected\n\n")  # show message
@@ -71,15 +79,15 @@ def main():
 
         writeLicensePlateCharsOnImage(imgOriginalScene, licPlate)           # write license plate text on the image
 
-        cv2.imshow("imgOriginalScene", imgOriginalScene)                # re-show scene image
+        #cv2.imshow("imgOriginalScene", imgOriginalScene)                # re-show scene image
 
-        cv2.imwrite("imgOriginalScene.png", imgOriginalScene)           # write image out to file
+        #cv2.imwrite("imgOriginalScene.png", imgOriginalScene)           # write image out to file
 
     # end if else
 
-    cv2.waitKey(0)					# hold windows open until user presses a key
+    #cv2.waitKey(0)					# hold windows open until user presses a key
 
-    return
+    return licPlate.strChars
 # end main
 
 ###################################################################################################
